@@ -1,6 +1,7 @@
-import 'package:floatings/model/FloatModel.dart';
-import 'package:floatings/utils/Toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_floating_menu/floating_menu.dart';
+import 'package:flutter_floating_menu/floating_menu_callback.dart';
+import 'package:flutter_floating_menu/floating_menu_item.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,7 +21,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
   final String title;
 
   @override
@@ -28,99 +28,86 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
-  bool isFloatClicked = false;
-  AnimationController controller;
-  Animation<Offset> offset;
-  List<FloatModel> floatList = [];
-  String centerText = "Floating";
-
-  @override
-  void initState() {
-    super.initState();
-    _prepareFloatingList();
-    controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 200));
-
-    offset = Tween<Offset>(begin: Offset.zero, end: Offset(2.0, 0.0))
-        .animate(controller);
-  }
+    implements FloatingMenuCallback {
+  String centerText = "Home";
 
   @override
   Widget build(BuildContext context) {
+    final List<FloatingMenuItem> floatMenuList = [
+      FloatingMenuItem(
+          id: 1,
+          icon: Icons.favorite,
+          backgroundColor: Colors.deepOrangeAccent),
+      FloatingMenuItem(id: 2, icon: Icons.map, backgroundColor: Colors.brown),
+      FloatingMenuItem(
+          id: 3, icon: Icons.email, backgroundColor: Colors.indigo),
+      FloatingMenuItem(id: 4, icon: Icons.event, backgroundColor: Colors.pink),
+      FloatingMenuItem(id: 5, icon: Icons.print, backgroundColor: Colors.green),
+      FloatingMenuItem(
+          id: 6, icon: Icons.home, backgroundColor: Colors.deepPurple),
+    ];
+
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomPadding: true,
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: Stack(
         children: <Widget>[
           Center(
-            child: Text(centerText),
-          ),
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  child: _showFloatingOptions(),
-                  height: 300,
-                  width: 60,
-                  padding: EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                ),
-                FloatingActionButton(
-                  onPressed: () {
-                    _changeFloatingVisibility();
-                  },
-                  child: isFloatClicked ? Icon(Icons.done) : Icon(Icons.add),
-                ),
-              ],
+            child: Text(
+              centerText,
+              style: TextStyle(color: Colors.black),
             ),
-          )
+          ),
+          FloatingMenu(
+            menuList: floatMenuList,
+            callback: this,
+            btnBackgroundColor: Colors.black,
+            preMenuIcon: Icons.add,
+            postMenuIcon: Icons.clear,
+          ),
         ],
       ),
     );
   }
 
-  void _changeFloatingVisibility() {
-    isFloatClicked = !isFloatClicked;
-    setState(() {});
-  }
-
-  Widget _showFloatingOptions() {
-    if (isFloatClicked) {
-      controller.reverse();
-    } else {
-      controller.forward();
+  @override
+  void onMenuClick(FloatingMenuItem floatingMenuItem) {
+    print("onMenuClicked : " + floatingMenuItem.id.toString());
+    switch (floatingMenuItem.id) {
+      case 1:
+        {
+          centerText = "Favorite";
+        }
+        break;
+      case 2:
+        {
+          centerText = "Map";
+        }
+        break;
+      case 3:
+        {
+          centerText = "Email";
+        }
+        break;
+      case 4:
+        {
+          centerText = "Event";
+        }
+        break;
+      case 5:
+        {
+          centerText = "Print";
+        }
+        break;
+      case 6:
+        {
+          centerText = "Home";
+        }
+        break;
     }
 
-    return SlideTransition(
-      transformHitTests: true,
-      position: offset,
-      child: ListView.builder(
-        itemCount: floatList.length,
-        itemBuilder: (BuildContext context, int index) {
-          var model = floatList[index];
-          return FloatingActionButton(
-            onPressed: () {
-              centerText = model.name;
-              _changeFloatingVisibility();
-              //Toast(model.name);
-            },
-            child: Icon(model.icon),
-          );
-        },
-      ),
-    );
-  }
-
-  void _prepareFloatingList() {
-    floatList.clear();
-    floatList.add(FloatModel(id: 1, icon: Icons.email, name: "Email"));
-    floatList.add(FloatModel(id: 2, icon: Icons.favorite, name: "Favorite"));
-    floatList.add(FloatModel(id: 3, icon: Icons.home, name: "Home"));
-    floatList.add(FloatModel(id: 4, icon: Icons.event, name: "Event"));
-    floatList.add(FloatModel(id: 5, icon: Icons.map, name: "Map"));
+    setState(() {});
   }
 }
